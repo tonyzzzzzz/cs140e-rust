@@ -8,3 +8,4 @@ pub mod print;
 mod start;
 pub mod uart;
 mod watchdog;
+pub mod libpi;

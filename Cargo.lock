@@ -7,6 +7,13 @@ name = "crab-pi"
 version = "0.1.0"
 
 [[package]]
+name = "gpio"
+version = "0.1.0"
+dependencies = [
+ "crab-pi",
+]
+
+[[package]]
 name = "test-println"
 version = "0.1.0"
 dependencies = [
