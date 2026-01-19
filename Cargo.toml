@@ -1,0 +1,4 @@
+[workspace]
+members = ["crab-pi", "test-println"]
+resolver = "3"
+
