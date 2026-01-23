@@ -3,4 +3,3 @@ pub fn delay_cycles(mut ticks: u32) {
         ticks -= 1;
     }
 }
-

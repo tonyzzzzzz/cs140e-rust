@@ -5,80 +5,21 @@ use core::ptr::{addr_of, with_exposed_provenance_mut};
 use crab_pi::interrupt::{enable_interrupts, interrupt_init, register_irq_basic_handler, IRQ_ENABLE_BASIC};
 use crab_pi::memory::dev_barrier;
 use crab_pi::{print, println};
-
-const ARM_TIMER_IRQ: usize = 1 << 0;
-
-const ARM_TIMER_BASE: usize = 0x2000_B400;
-const ARM_TIMER_LOAD: *mut u32 = with_exposed_provenance_mut(ARM_TIMER_BASE + 0x0);
-const ARM_TIMER_VALUE: *mut u32 = with_exposed_provenance_mut(ARM_TIMER_BASE + 0x4);
-const ARM_TIMER_CONTROL: *mut u32 = with_exposed_provenance_mut(ARM_TIMER_BASE + 0x8);
-const ARM_TIMER_IRQ_CLEAR: *mut u32 = with_exposed_provenance_mut(ARM_TIMER_BASE + 0x0C);
-const ARM_TIMER_IRQ_RAW: *mut u32 = with_exposed_provenance_mut(ARM_TIMER_BASE + 0x10);
-const ARM_TIMER_IRQ_MASKED: *mut u32 = with_exposed_provenance_mut(ARM_TIMER_BASE + 0x14);
-const ARM_TIMER_RELOAD: *mut u32 = with_exposed_provenance_mut(ARM_TIMER_BASE + 0x18);
-const ARM_TIMER_PREDIV: *mut u32 = with_exposed_provenance_mut(ARM_TIMER_BASE + 0x1C);
-const ARM_TIMER_COUNTER: *mut u32 = with_exposed_provenance_mut(ARM_TIMER_BASE + 0x20);
-
-pub struct ArmTimerCtrl(u32);
-impl ArmTimerCtrl {
-    pub const ARM_TIMER_CTRL_32BIT        : u32 = ( 1 << 1 );
-    pub const ARM_TIMER_CTRL_PRESCALE_1   : u32 = ( 0 << 2 );
-    pub const ARM_TIMER_CTRL_PRESCALE_16  : u32 = ( 1 << 2 );
-    pub const ARM_TIMER_CTRL_PRESCALE_256 : u32 = ( 2 << 2 );
-    pub const ARM_TIMER_CTRL_INT_ENABLE   : u32 = ( 1 << 5 );
-    pub const ARM_TIMER_CTRL_ENABLE       : u32 = ( 1 << 7 );
-}
+use crab_pi::timer::{clear_irq, timer_get_usec, timer_init};
 
 static mut cnt: u32 = 0;
 static mut period: u32 = 0;
 static mut period_sum: u32 = 0;
 static mut last_clk: u32 = 0;
 
-unsafe fn timer_get_usec_raw() -> u32 {
-    return *with_exposed_provenance_mut(0x2000_3004);
-}
-
-unsafe fn timer_get_usec() -> u32 {
-    dev_barrier();
-    let u = timer_get_usec_raw();
-    dev_barrier();
-    u
-}
-
-unsafe fn timer_init(prescale: u32, ncycles: u32) {
-    println!("timer init");
-
-    dev_barrier();
-
-    // Timer handler is at index 0, which is equal to 1 << 0.
-    register_irq_basic_handler(0, timer_interrupt_handler);
-
-    *IRQ_ENABLE_BASIC = ARM_TIMER_IRQ as u32;
-
-    dev_barrier();
-
-    *ARM_TIMER_LOAD = ncycles;
-
-    let v = match prescale {
-        1 => ArmTimerCtrl::ARM_TIMER_CTRL_PRESCALE_1,
-        16 => ArmTimerCtrl::ARM_TIMER_CTRL_PRESCALE_16,
-        256 => ArmTimerCtrl::ARM_TIMER_CTRL_PRESCALE_256,
-        _ => panic!("unsupported prescale"),
-    };
-
-    *ARM_TIMER_CONTROL = ArmTimerCtrl::ARM_TIMER_CTRL_32BIT | ArmTimerCtrl::ARM_TIMER_CTRL_ENABLE | ArmTimerCtrl::ARM_TIMER_CTRL_INT_ENABLE | v;
-
-    dev_barrier();
-}
-
-fn timer_interrupt_handler() {
+fn timer_interrupt_handler(pc: u32) {
     unsafe {
-        *ARM_TIMER_IRQ_CLEAR = 1;
+        clear_irq();
 
         dev_barrier();
 
         cnt += 1;
-        let clk = timer_get_usec_raw();
+        let clk = timer_get_usec();
         period = if last_clk == 0 { 0 } else { clk - last_clk } ;
         last_clk = clk;
         period_sum += period;
@@ -94,6 +35,9 @@ fn __user_main() {
     println!("Hello, world!");
     unsafe {
         interrupt_init();
+        // Timer handler is at index 0, which is equal to 1 << 0.
+        register_irq_basic_handler(0, timer_interrupt_handler);
+
         timer_init(16, 0x100);
 
         println!("enabling global ints");

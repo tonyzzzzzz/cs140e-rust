@@ -22,7 +22,7 @@ const IRQ_DISABLE_BASIC: *mut u32 = with_exposed_provenance_mut(IRQ_BASE + 0x24)
 /*
     REGISTRY
  */
-pub type IrqHandler = fn();
+pub type IrqHandler = fn(u32);
 static mut IRQ_BASIC_HANDLERS: [Option<IrqHandler>; 32] = [None; 32];
 
 
@@ -58,7 +58,7 @@ unsafe extern "C" fn interrupt_vector(pc: u32) {
     for i in 0..32 {
         if pending & (1 << i) != 0 {
             if let Some(handler) = IRQ_BASIC_HANDLERS[i] {
-                handler();
+                handler(pc);
             }
         }
     }

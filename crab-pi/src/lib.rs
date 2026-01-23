@@ -17,3 +17,4 @@ pub mod memory;
 pub mod kmalloc;
 pub mod gpio;
 mod macros;
+pub mod timer;
