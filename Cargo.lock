@@ -14,7 +14,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "gprof"
+version = "0.1.0"
+dependencies = [
+ "crab-pi",
+]
+
+[[package]]
 name = "test-println"
+version = "0.1.0"
+dependencies = [
+ "crab-pi",
+]
+
+[[package]]
+name = "timer"
 version = "0.1.0"
 dependencies = [
  "crab-pi",

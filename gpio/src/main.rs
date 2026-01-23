@@ -1,12 +1,10 @@
 #![no_std]
 #![no_main]
 
-mod gpio;
 
 use crab_pi::libpi::delay_cycles;
-use crab_pi::println;
 
-use gpio::*;
+use crab_pi::gpio::*;
 
 const LED_1: u32 = 20;
 const LED_2: u32 = 27;

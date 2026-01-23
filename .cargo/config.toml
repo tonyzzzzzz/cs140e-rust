@@ -1,5 +1,5 @@
 [build]
-target = "armv6zk-none-eabihf.json"
+target = "armv6zk-none-eabi.json"
 
 [target.armv6zk-none-eabihf]
 rustflags = [
@@ -9,7 +9,20 @@ rustflags = [
     "-C", "link-arg=-Tmemory.ld",
     "-C", "link-arg=--fix-arm1176",
     "-C", "link-arg=--use-blx",
-    "-C", "link-arg=-lstaff-uart"
+#    "-C", "link-arg=crab-pi/obj/kmalloc.o"
+]
+runner = "./upload.sh"
+linker = "arm-none-eabi-ld"
+
+[target.armv6zk-none-eabi]
+rustflags = [
+    "-C", "link-arg=-z noexecstack",
+    "-C", "link-arg=--gc-sections",
+    "-C", "link-arg=-nostdlib",
+    "-C", "link-arg=-Tmemory.ld",
+    "-C", "link-arg=--fix-arm1176",
+    "-C", "link-arg=--use-blx",
+    "-C", "link-arg=crab-pi/obj/kmalloc.o"
 ]
 runner = "./upload.sh"
 linker = "arm-none-eabi-ld"

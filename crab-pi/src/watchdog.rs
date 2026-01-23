@@ -24,3 +24,8 @@ pub extern "C" fn restart() -> ! {
 
     loop {}
 }
+
+#[unsafe(no_mangle)]
+pub extern "C" fn clean_reboot() -> ! {
+    restart()
+}

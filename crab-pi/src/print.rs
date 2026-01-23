@@ -7,6 +7,12 @@ impl ::core::fmt::Write for UartProxy {
     }
 }
 
+#[unsafe(no_mangle)]
+#[feature(c_varadic)]
+pub unsafe extern "C" fn printk(mut args: ...) -> i32 {
+    0
+}
+
 #[macro_export]
 macro_rules! print {
     ($($args:tt)*) => {

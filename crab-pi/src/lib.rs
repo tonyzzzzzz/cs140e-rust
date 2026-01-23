@@ -1,3 +1,5 @@
+#![feature(c_variadic)]
+#![feature(allocator_api)]
 #![no_std]
 #![no_main]
 
@@ -9,3 +11,9 @@ mod start;
 pub mod uart;
 mod watchdog;
 pub mod libpi;
+pub mod interrupt;
+mod constant;
+pub mod memory;
+pub mod kmalloc;
+pub mod gpio;
+mod macros;
