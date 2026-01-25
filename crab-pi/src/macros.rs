@@ -58,6 +58,12 @@ macro_rules! enum_u32 {
             }
         }
 
+        impl From<$Name> for u32 {
+            fn from(v: $Name) -> Self {
+                v.val()
+            }
+        }
+
         impl ::core::ops::BitOr for $Name {
             type Output = u32;
             fn bitor(self, rhs: Self) -> Self::Output {

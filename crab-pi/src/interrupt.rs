@@ -1,8 +1,23 @@
-use core::arch::global_asm;
-use core::ptr::with_exposed_provenance_mut;
+use core::arch::{asm, global_asm};
+use core::ptr::{with_exposed_provenance, with_exposed_provenance_mut};
+use log::trace;
 use crate::constant::INT_STACK_ADDR;
 use crate::memory::{dev_barrier, gcc_mb};
-use crate::println;
+use crate::{enum_u32, println};
+use crate::watchdog::clean_reboot;
+
+enum_u32! {
+    pub enum SYS_MODE {
+        USER = 0b10000,
+        FIQ = 0b10001,
+        IRQ = 0b10010,
+        SVC = 0b10011,
+        ABT = 0b10111,
+        UND = 0b11011,
+        SYS = 0b11111,
+    }
+}
+
 
 /*
     POINTER DEFINITIONS
@@ -50,6 +65,20 @@ extern "C" fn fast_interrupt_vector(pc: u32) {
     panic!("not implemented yet");
 }
 
+#[inline]
+pub fn cpsr_get() -> u32 {
+    let mut cpsr: u32;
+    unsafe { asm!("mrs {}, cpsr", out(reg) cpsr); }
+    cpsr & 0b11111
+}
+
+#[inline]
+pub fn spsr_get() -> u32 {
+    let mut spsr: u32;
+    unsafe { asm!("mrs {}, spsr", out(reg) spsr); }
+    spsr & 0b11111
+}
+
 unsafe extern "C" fn interrupt_vector(pc: u32) {
     dev_barrier();
 
@@ -74,8 +103,35 @@ extern "C" fn undefined_instruction_vector(pc: u32) {
     panic!("undefined instruction");
 }
 
-extern "C" fn syscall_vector(pc: u32) {
-    panic!("syscall");
+extern "C" fn syscall_vector(pc: usize, r0: usize) -> i32 {
+    let instruction = unsafe {*with_exposed_provenance::<u32>(pc)};
+    let sys_num = instruction & 0x00ffffff;
+
+    #[cfg(debug_assertions)]
+    unsafe {
+        let prev_mode = spsr_get();
+
+        if (prev_mode != SYS_MODE::USER.into()) {
+            panic!("syscall in non-user mode: {:x}", sys_num);
+        }
+
+        println!("success: spsr is at user level: mode={:b}", prev_mode);
+    }
+
+    match sys_num {
+        1 => {
+            println!("syscall: hello world");
+            0
+        }
+        2 => {
+            println!("syscall: exit");
+            clean_reboot()
+        }
+        _ => {
+            println!("syscall: unknown: {:x}", sys_num);
+            -1
+        }
+    }
 }
 
 extern "C" fn prefetch_abort_vector(pc: u32) {
@@ -96,7 +152,7 @@ pub unsafe fn interrupt_init() {
 
     dev_barrier();
 
-    let interrupt_table =  &_interrupt_table as *const u32;
+    let interrupt_table = &_interrupt_table as *const u32;
     let interrupt_table_end = &_interrupt_table_end as *const u32;
 
     println!("Installed interrupt handler, interrupt table {:p}, end {:p}", interrupt_table, interrupt_table_end);

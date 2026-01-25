@@ -5,6 +5,9 @@ version = 4
 [[package]]
 name = "crab-pi"
 version = "0.1.0"
+dependencies = [
+ "log",
+]
 
 [[package]]
 name = "gpio"
@@ -15,6 +18,19 @@ dependencies = [
 
 [[package]]
 name = "gprof"
+version = "0.1.0"
+dependencies = [
+ "crab-pi",
+]
+
+[[package]]
+name = "log"
+version = "0.4.29"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5e5032e24019045c762d3c0f28f5b6b8bbf38563a65908389bf7978758920897"
+
+[[package]]
+name = "syscall"
 version = "0.1.0"
 dependencies = [
  "crab-pi",

@@ -137,8 +137,39 @@ reset_asm:
 @ Q: what are the right offsets for the following?
 undefined_instruction_asm:                      @ A2-19
     unexpected {undefined_instruction_vector}, 4
-software_interrupt_asm:                         @ A2-20
-    unexpected {syscall_vector}, 4
+
+
+software_interrupt_asm:
+    @ runs at system level (p.a2-5): assumes we have a sp
+    @
+    @ you're going to call:
+    @    int syscall_vector(unsigned pc, uint32_t r0)
+
+    @   1 save regs as with interrupt vector
+    push        {{r4-r12,lr}}
+
+    @   2 figure out the lr offset you need to correct.
+    sub         lr, lr, #4
+
+    @   3 mov the original r0 into r1 (so it's the second
+    @     parameter to <syscall_vector>)
+    mov         r1, r0
+
+    @   4 mov the pointer to the syscall inst into r0
+    @     (so its the first parameter to <syscall_vector>)
+    mov         r0, lr
+
+    @   5 call ,syscall_vector>
+    bl          {syscall_vector}
+
+    @   6 restore regs: must be identical to what got pushed
+    @     at step (1)
+    pop         {{r4-r12,lr}}
+
+    @   - return from the exception (look at interrupt_asm)
+    movs        pc, lr
+
+
 prefetch_abort_asm:
     unexpected {prefetch_abort_vector}, 4
 data_abort_asm:
