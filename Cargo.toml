@@ -1,4 +1,4 @@
 [workspace]
-members = ["crab-pi", "test-println", "gpio", "timer", "gprof", "syscall"]
+members = ["crab-pi", "test-println", "gpio", "timer", "gprof", "syscall", "thread"]
 resolver = "3"
 

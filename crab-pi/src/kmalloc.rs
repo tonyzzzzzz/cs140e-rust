@@ -27,6 +27,11 @@ void *kmalloc_heap_end(void);
 use core::alloc::{AllocError, Allocator, GlobalAlloc, Layout};
 use core::ptr::{with_exposed_provenance_mut, NonNull};
 use core::sync::atomic::{AtomicBool, Ordering};
+use crate::println;
+
+unsafe extern "C" {
+    static __heap_start__: [u8; 0];
+}
 
 unsafe extern "C" {
     fn kmalloc(nbytes: usize) -> *mut u8;
@@ -119,29 +124,43 @@ unsafe fn ensure_init_default() {
     if !KMALLOC_INITIALIZED.load(Ordering::Acquire) {
         // Default heap placement: start at 1 MiB, size 64 MiB.
         let mb: usize = 1024 * 1024;
-        kmalloc_init_set_start(with_exposed_provenance_mut(mb), 64 * mb);
+        kmalloc_init_set_start(&__heap_start__ as *const u8 as *mut u8, 64 * mb);
         KMALLOC_INITIALIZED.store(true, Ordering::Release);
     }
 }
 
 unsafe impl GlobalAlloc for KmallocAllocator {
     unsafe fn alloc(&self, layout: Layout) -> *mut u8 {
+        println!("Allocating {} size", layout.size());
         ensure_init_default();
-        kmalloc_aligned(layout.size(), layout.align())
+        let ptr = kmalloc_aligned(layout.size(), layout.align());
+        println!("Allocated at {:p}", ptr);
+        ptr
     }
 
     unsafe fn dealloc(&self, ptr: *mut u8, layout: Layout) {
+        println!("Allocating {} size", layout.size());
         ensure_init_default();
+        println!("Deallocating, NOP")
         // NOP, does not support deallocation
     }
 
     unsafe fn alloc_zeroed(&self, layout: Layout) -> *mut u8 {
+        println!("Allocating {} size", layout.size());
         ensure_init_default();
-        kmalloc_aligned(layout.size(), layout.align())
+        let ptr = kmalloc_aligned(layout.size(), layout.align());
+        println!("Allocated at {:p}", ptr);
+        ptr
     }
 
     unsafe fn realloc(&self, ptr: *mut u8, layout: Layout, new_size: usize) -> *mut u8 {
+        println!("Reallocating from {} to {} bytes", layout.size(), new_size);
         ensure_init_default();
-        kmalloc_aligned(new_size, layout.align())
+        let new_ptr = kmalloc_aligned(new_size, layout.align());
+        // Copy old data to new allocation
+        let copy_size = layout.size().min(new_size);
+        core::ptr::copy_nonoverlapping(ptr, new_ptr, copy_size);
+        println!("Reallocated from {:p} to {:p}", ptr, new_ptr);
+        new_ptr
     }
 }

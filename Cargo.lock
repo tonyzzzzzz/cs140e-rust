@@ -44,6 +44,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "thread"
+version = "0.1.0"
+dependencies = [
+ "crab-pi",
+]
+
+[[package]]
 name = "timer"
 version = "0.1.0"
 dependencies = [
