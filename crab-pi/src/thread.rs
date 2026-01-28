@@ -120,6 +120,10 @@ pub fn rpi_fork(f: RPIThreadExecFn, arg: *const u32) {
     }
 }
 
+pub fn rpi_cur_thread_id() -> usize {
+    unsafe { CUR_THREAD.as_ref().unwrap().thread_id }
+}
+
 // pub fn rpi_cur_thread() -> Box<RPIThread> {
 //     unsafe { CUR_THREAD.unwrap() }
 // }
@@ -147,10 +151,20 @@ pub extern "C" fn rpi_exit(exit_code: i32){
 }
 
 pub fn rpi_yield() {
-    todo!()
+    unsafe {
+        if RUN_Q.is_empty() {
+            return;
+        }
+
+        let mut previous_thread = CUR_THREAD.take().unwrap();
+        let previous_thread_sp = &raw mut previous_thread.saved_sp;
+
+        RUN_Q.push_back(previous_thread);
+
+        let next_thread = RUN_Q.pop_front().unwrap();
+        let next_thread_sp = next_thread.saved_sp;
+        CUR_THREAD = Some(next_thread);
+
+        rpi_cswitch(previous_thread_sp, next_thread_sp)
+    }
 }
-
-pub fn rpi_switch() {
-
-}
-

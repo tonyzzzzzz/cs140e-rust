@@ -1,4 +1,8 @@
 use core::arch::{asm, global_asm};
+use crate::kmalloc::KmallocAllocator;
+
+#[global_allocator]
+static GLOBAL: KmallocAllocator = KmallocAllocator;
 
 global_asm!(include_str!("../asm/mem-barrier.S"));
 
