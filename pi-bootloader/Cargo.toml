@@ -12,4 +12,5 @@ bench = false
 
 [dependencies]
 constants = { path = "../shared/constants" }
-crab-pi = {path='../rust_os/crab-pi', default-features = false}
+crab-pi = { path = '../rust_os/crab-pi', default-features = false }
+crc32fast = { version = "1.5.0", default-features = false }

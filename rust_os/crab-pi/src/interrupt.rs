@@ -107,6 +107,8 @@ extern "C" fn undefined_instruction_vector(pc: u32) {
 extern "C" fn syscall_vector(pc: usize, r0: usize) -> i32 {
     let instruction = unsafe {*with_exposed_provenance::<u32>(pc)};
     let sys_num = instruction & 0x00ffffff;
+    
+    println!("syscall: {:x}", sys_num);
 
     #[cfg(debug_assertions)]
     unsafe {

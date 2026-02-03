@@ -19,8 +19,10 @@ unsafe extern "C" {
     // is to prevent aliasing, since otherwise producing mutable references to anything in the BSS
     // would be undefined behaviour.
 
-    safe static __bss_start__: [u32; 0];
-    safe static __bss_end__: [u32; 0];
+    static __bss_start__: [u32; 0];
+    static __bss_end__: [u32; 0];
+
+    fn BRANCHTO(addr: u32) -> !;
 }
 
 unsafe fn zero_out_bss() {
@@ -47,7 +49,6 @@ pub fn cycle_cnt_init() {
 }
 
 
-
 #[unsafe(no_mangle)]
 extern "C" fn _cstart() {
     unsafe {
@@ -60,26 +61,33 @@ extern "C" fn _cstart() {
         main();
     }
 
-
     watchdog::clean_reboot();
 }
 
 #[unsafe(no_mangle)]
 extern "C" fn rpi_reboot() {
-
+    watchdog::clean_reboot();
 }
-
-
 
 pub fn wait_for_data(timeout: Option<Duration>) {
     let packet = BOOT_OP::GET_PROG_INFO.val().to_le_bytes();
     loop {
         uart::write_bytes(&packet);
-        can_read_timeout(Duration::from_millis(300));
+        if can_read_timeout(Duration::from_millis(300)) {
+            break;
+        }
     }
 }
 
+fn debug_print(s: &str) {
+    let s_bytes = s.as_bytes();
 
+    let mut write_buf = [0u8; 4 + 4];
+    write_buf[..4].copy_from_slice(&BOOT_OP::PRINT_STRING.val().to_le_bytes());
+    write_buf[4..].copy_from_slice(&s_bytes.len().to_le_bytes());
+    write_bytes(&write_buf);
+    write_bytes(s_bytes);
+}
 
 
 unsafe fn main() {
@@ -95,10 +103,14 @@ unsafe fn main() {
     let addr = u32::from_le_bytes(chunks.next().unwrap().try_into().unwrap());
     let nbytes = u32::from_le_bytes(chunks.next().unwrap().try_into().unwrap());
     let cksum = u32::from_le_bytes(chunks.next().unwrap().try_into().unwrap());
-
     assert_eq!(op, BOOT_OP::PUT_PROG_INFO.val());
 
-    // TODO: Check collision
+    // Check Collision
+    if addr + nbytes > 0x200000 {
+        let write_buf = BOOT_OP::BOOT_ERROR.val().to_le_bytes();
+        write_bytes(&write_buf);
+        return;
+    }
 
     // Echo back GET_CODE
     let mut write_buf = [0u8; 8];
@@ -107,11 +119,21 @@ unsafe fn main() {
     write_bytes(&write_buf);
 
     // Expect [PUT_CODE, CODE]
+    let mut op_buf = [0u8; 4];
+    read_bytes(&mut op_buf);
+    assert_eq!(u32::from_le_bytes(op_buf), BOOT_OP::PUT_CODE.val());
+
     let code_begin_ptr = with_exposed_provenance_mut::<u8>(addr as usize);
     let bytes_array_ptr = core::slice::from_raw_parts_mut(code_begin_ptr, nbytes as usize);
     read_bytes(bytes_array_ptr);
 
-    // TODO: Verify cksum
+    let recv_crc32 = crc32fast::hash(bytes_array_ptr);
+
+    if recv_crc32 != cksum {
+        let write_buf = BOOT_OP::BOOT_ERROR.val().to_le_bytes();
+        write_bytes(&write_buf);
+        return;
+    }
 
     // Return boot success
     let write_buf = BOOT_OP::BOOT_SUCCESS.val().to_le_bytes();
@@ -119,4 +141,6 @@ unsafe fn main() {
 
     // Flush
     uart::flush();
+
+    BRANCHTO(addr);
 }

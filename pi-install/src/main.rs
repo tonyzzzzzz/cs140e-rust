@@ -136,6 +136,8 @@ fn main() {
                     continue;
                 }
 
+                println!("Sending program info...");
+
                 let mut write_buf = BytesMut::with_capacity(4 * 4);
                 write_buf.put_u32_le(PUT_PROG_INFO.into());
                 write_buf.put_u32_le(ARM_BASE);
@@ -147,6 +149,9 @@ fn main() {
                 get_prog_handled = true;
             }
             Some(BOOT_OP::GET_CODE) => {
+
+                println!("Sending code...");
+
                 // Check CRC32 is the same
                 port.read_exact(&mut buf)
                     .expect("Failed to read CRC32 echo");
