@@ -1,0 +1,15 @@
+[package]
+name = "pi-bootloader"
+version = "0.1.0"
+edition = "2024"
+
+[[bin]]
+name = "main"
+path = "src/main.rs"
+test = false
+doctest = false
+bench = false
+
+[dependencies]
+constants = { path = "../shared/constants" }
+crab-pi = {path='../rust_os/crab-pi', default-features = false}

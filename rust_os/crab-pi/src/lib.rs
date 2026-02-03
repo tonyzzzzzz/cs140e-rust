@@ -4,11 +4,13 @@
 #![no_main]
 extern crate alloc;
 
+#[cfg(feature = "start")]
+mod start;
+
 mod arch;
 mod llvm_infra;
 mod panic_infra;
 pub mod print;
-mod start;
 pub mod uart;
 pub mod watchdog;
 pub mod libpi;

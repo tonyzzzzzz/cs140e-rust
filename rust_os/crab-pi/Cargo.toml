@@ -3,6 +3,10 @@ name = "crab-pi"
 version = "0.1.0"
 edition = "2024"
 
+[features]
+default = ["start"]
+start = []
+
 [dependencies]
 log = "0.4.29"
 macros = { path = '../../shared/macros' }

@@ -1,4 +1,5 @@
 use core::ptr::with_exposed_provenance;
+use core::time::Duration;
 use macros::{enum_ptr, enum_u32};
 use crate::println;
 use crate::interrupt::IRQ_ENABLE_BASIC;
@@ -43,6 +44,13 @@ pub unsafe fn timer_get_usec() -> u32 {
     let u = timer_get_usec_raw();
     dev_barrier();
     u
+}
+
+pub fn sleep(duration: Duration) {
+    unsafe {
+        let time_now = timer_get_usec();
+        while timer_get_usec() - time_now < duration.as_micros() as u32 {}
+    }
 }
 
 pub unsafe fn clear_irq() {

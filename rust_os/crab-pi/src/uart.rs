@@ -83,14 +83,42 @@ pub fn flush() {
     dmb();
 }
 
+#[inline(always)]
+pub fn can_write() -> bool {
+    let state_reg = AUX_REG::AUX_MU_STAT_REG.as_ptr::<u32>();
+    unsafe {
+        (state_reg.read_volatile() & 0x2) != 0
+    }
+}
+
+#[inline(always)]
+pub fn can_read() -> bool {
+    let state_reg = AUX_REG::AUX_MU_STAT_REG.as_ptr::<u32>();
+    unsafe {
+        (state_reg.read_volatile() & 0x1) != 0
+    }
+}
+
+// TODO: Implement STD IO
 pub fn write_bytes(bytes: &[u8]) {
     dmb();
-    let state_reg = AUX_REG::AUX_MU_STAT_REG.as_ptr::<u32>();
     let io_reg = AUX_REG::AUX_MU_IO_REG.as_mut_ptr::<u8>();
     unsafe {
         for byte in bytes {
-            while (state_reg.read_volatile() & 0x2 == 0x0) {}
+            while !can_write() {}
             io_reg.write_volatile(*byte);
+        }
+    }
+    dmb();
+}
+
+pub fn read_bytes(bytes: &mut [u8]) {
+    dmb();
+    let io_reg = AUX_REG::AUX_MU_IO_REG.as_ptr::<u8>();
+    unsafe {
+        for byte in bytes {
+            while !can_read() {}
+            *byte = io_reg.read_volatile();
         }
     }
     dmb();
