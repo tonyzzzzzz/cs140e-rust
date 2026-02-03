@@ -16,6 +16,7 @@ runner = "./build_bin.sh"
 [unstable]
 build-std = ["core", "compiler_builtins", "alloc"]
 build-std-features = ["compiler-builtins-mem"]
+json-target-spec = true
 
 [profile]
 dev.panic = "abort"

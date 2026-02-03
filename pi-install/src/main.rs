@@ -36,6 +36,12 @@ fn find_serial_port(first: bool) -> Option<PathBuf> {
 
     let mut metadata = ports
         .iter()
+        .filter(|x| {
+            let serialport::SerialPortType::UsbPort(port_info) = &x.port_type else {
+                return false;
+            };
+            port_info.vid == 0x10c4 && port_info.pid == 0xea60
+        })
         .map(|x| {
             (
                 fs::metadata(x.port_name.clone()).unwrap(),
