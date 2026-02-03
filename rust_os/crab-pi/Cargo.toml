@@ -5,3 +5,4 @@ edition = "2024"
 
 [dependencies]
 log = "0.4.29"
+macros = { path = '../../shared/macros' }

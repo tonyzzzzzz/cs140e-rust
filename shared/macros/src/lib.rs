@@ -1,3 +1,5 @@
+#![no_std]
+#![no_main]
 #[macro_export]
 macro_rules! enum_ptr {
     ($(#[$m:meta])* $vis:vis enum $Name:ident { $($V:ident = $n:expr,)* }) => {

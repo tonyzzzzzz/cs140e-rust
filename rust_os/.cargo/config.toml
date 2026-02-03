@@ -22,7 +22,7 @@ rustflags = [
     "-C", "link-arg=-Tmemory.ld",
     "-C", "link-arg=--fix-arm1176",
     "-C", "link-arg=--use-blx",
-    "-C", "link-arg=crab-pi/obj/kmalloc.o"
+    "-C", "link-arg=crab-pi/obj/kmalloc.o",
 ]
 runner = "./upload.sh"
 linker = "arm-none-eabi-ld"

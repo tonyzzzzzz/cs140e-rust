@@ -3,8 +3,9 @@ use core::ptr::{with_exposed_provenance, with_exposed_provenance_mut};
 use log::trace;
 use crate::constant::INT_STACK_ADDR;
 use crate::memory::{dev_barrier, gcc_mb};
-use crate::{enum_u32, println};
+use crate::println;
 use crate::watchdog::clean_reboot;
+use macros::enum_u32;
 
 enum_u32! {
     pub enum SYS_MODE {

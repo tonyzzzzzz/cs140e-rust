@@ -115,7 +115,7 @@ interrupt_asm:
                         @ 2. moves <lr> into the <pc> of that
                         @    mode.
 
-@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 @ currently we don't use any of these, so just panic and
 @ and halt.  should not occur!
 

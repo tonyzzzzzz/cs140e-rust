@@ -5,6 +5,7 @@
 use crab_pi::libpi::delay_cycles;
 
 use crab_pi::gpio::*;
+use crab_pi::println;
 
 const LED_1: u32 = 20;
 const LED_2: u32 = 27;
@@ -87,6 +88,7 @@ fn _5_all() {
 
 #[unsafe(no_mangle)]
 fn __user_main() {
-    _3_loopback();
+    println!("Hello World");
+    _4_act_blink();
 }
 

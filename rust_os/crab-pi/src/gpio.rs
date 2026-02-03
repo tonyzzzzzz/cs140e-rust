@@ -1,4 +1,4 @@
-use crate::{enum_ptr, enum_u32};
+use macros::{enum_ptr, enum_u32};
 
 const GPIO_BASE_ADDR: u32 = 0x2020_0000;
 const GPIO_SET0_OFFSET: u32 = 0x1c;

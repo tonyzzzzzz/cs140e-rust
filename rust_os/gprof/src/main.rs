@@ -3,21 +3,13 @@
 
 extern crate alloc;
 
-use alloc::boxed::Box;
-use alloc::rc::Rc;
 use alloc::vec;
 use alloc::vec::Vec;
-use core::cell::RefCell;
 use core::mem::MaybeUninit;
-use core::ptr::addr_of;
 use crab_pi::interrupt::{enable_interrupts, interrupt_init, register_irq_basic_handler, IrqHandler};
-use crab_pi::kmalloc::KmallocAllocator;
 use crab_pi::memory::dev_barrier;
 use crab_pi::println;
 use crab_pi::timer::{clear_irq, timer_get_usec, timer_init};
-
-#[global_allocator]
-static GLOBAL: KmallocAllocator = KmallocAllocator;
 
 static mut cnt: u32 = 0;
 static mut period: u32 = 0;

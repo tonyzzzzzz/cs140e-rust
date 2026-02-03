@@ -1,5 +1,6 @@
 use core::ptr::with_exposed_provenance;
-use crate::{enum_ptr, enum_u32, println};
+use macros::{enum_ptr, enum_u32};
+use crate::println;
 use crate::interrupt::IRQ_ENABLE_BASIC;
 use crate::memory::dev_barrier;
 use crate::timer::ARM_TIMER::ARM_TIMER_CONTROL;

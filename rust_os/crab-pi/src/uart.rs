@@ -1,4 +1,4 @@
-use crate::enum_ptr;
+use macros::enum_ptr;
 use crate::gpio::{gpio_set_function, GPIO_FUNC};
 use crate::memory::dmb;
 
