@@ -1,6 +1,8 @@
+use core::time::Duration;
 use macros::enum_ptr;
 use crate::gpio::{gpio_set_function, GPIO_FUNC};
 use crate::memory::dmb;
+use crate::timer::timer_get_usec;
 
 const AUX_BASE_ADDR: u32 = 0x2021_5000;
 
@@ -97,6 +99,19 @@ pub fn can_read() -> bool {
     unsafe {
         (state_reg.read_volatile() & 0x1) != 0
     }
+}
+
+pub fn can_read_timeout(timeout: Duration) -> bool {
+    let state_reg = AUX_REG::AUX_MU_STAT_REG.as_ptr::<u32>();
+    unsafe {
+        let time_now = timer_get_usec();
+        while timer_get_usec() - time_now < timeout.as_micros() as u32 {
+            if (state_reg.read_volatile() & 0x1) != 0 {
+                return true;
+            }
+        }
+    }
+    false
 }
 
 // TODO: Implement STD IO
