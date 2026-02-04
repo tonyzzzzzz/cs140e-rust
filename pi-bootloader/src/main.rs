@@ -139,6 +139,10 @@ unsafe fn main() {
     let write_buf = BOOT_OP::BOOT_SUCCESS.val().to_le_bytes();
     write_bytes(&write_buf);
 
+    // Add name
+    let name = "Jiaye Zou: BootLoader starting.\n";
+    write_bytes(name.as_bytes());
+
     // Flush
     uart::flush();
 
