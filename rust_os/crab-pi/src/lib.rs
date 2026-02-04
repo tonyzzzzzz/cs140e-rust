@@ -4,7 +4,6 @@
 #![no_main]
 extern crate alloc;
 
-#[cfg(feature = "start")]
 mod start;
 
 mod arch;
