@@ -42,13 +42,13 @@ unsafe extern "C" {
 }
 
 static N: usize = 1024 * 64;
-static USER_STACK: [u8; N] = [0; N];
+static USER_STACK: [u128; N / 16usize] = [0; N / 16usize];
 
 extern "C" fn user_fn() {
     println!("Hello from user mode!");
 
     println!("Checking that stack got switched");
-    let var: u8 = 0;
+    let var: u128 = 0;
     unsafe {
         assert!(&var as *const _ >= &USER_STACK as *const _);
         assert!(&var as *const _ < USER_STACK.as_ptr().add(N) as *const _);
