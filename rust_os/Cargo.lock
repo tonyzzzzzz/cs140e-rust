@@ -35,6 +35,13 @@ name = "macros"
 version = "0.1.0"
 
 [[package]]
+name = "sw_uart"
+version = "0.1.0"
+dependencies = [
+ "crab-pi",
+]
+
+[[package]]
 name = "syscall"
 version = "0.1.0"
 dependencies = [

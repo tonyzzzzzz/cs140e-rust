@@ -4,6 +4,7 @@
 #![no_main]
 extern crate alloc;
 
+#[cfg(feature = "start-asm")]
 mod start;
 
 mod arch;
@@ -20,3 +21,4 @@ pub mod kmalloc;
 pub mod gpio;
 pub mod timer;
 pub mod thread;
+pub mod cycle_count;

@@ -8,6 +8,7 @@ use core::ptr::with_exposed_provenance_mut;
 use core::time::Duration;
 use crab_pi::{println, uart, watchdog};
 use constants::BOOT_OP;
+use crab_pi::cycle_count::cycle_cnt_init;
 use crab_pi::memory::gcc_mb;
 use crab_pi::timer::sleep;
 use crab_pi::uart::{can_read_timeout, read_bytes, write_bytes};
@@ -36,18 +37,6 @@ unsafe fn zero_out_bss() {
     }
     gcc_mb();
 }
-
-#[inline(always)]
-pub fn cycle_cnt_init() {
-    unsafe {
-        asm!(
-        "mcr p15, 0, {val}, c15, c12, 0",
-        val = in(reg) 1u32,
-        options(nomem, nostack)
-        );
-    }
-}
-
 
 #[unsafe(no_mangle)]
 extern "C" fn _cstart() {

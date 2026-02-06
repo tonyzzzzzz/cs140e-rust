@@ -1,7 +1,7 @@
 use core::time::Duration;
 use macros::enum_ptr;
 use crate::gpio::{gpio_set_function, GPIO_FUNC};
-use crate::memory::dmb;
+use crate::memory::{dev_barrier, dmb};
 use crate::timer::timer_get_usec;
 
 const AUX_BASE_ADDR: u32 = 0x2021_5000;
@@ -73,6 +73,25 @@ pub unsafe fn init(baud_rate: u32) {
     AUX_REG::AUX_MU_CNTL_REG.as_mut_ptr::<u8>().write_volatile(0x3);
 
     dmb();
+}
+
+pub fn disable_uart() {
+    flush();
+    dev_barrier();
+    unsafe {
+        let aux_reg = AUX_REG::AUX_ENABLES.as_mut_ptr::<u32>();
+        *aux_reg &= !0x1;
+    }
+    dev_barrier();
+}
+
+pub fn enable_uart() {
+    dev_barrier();
+    unsafe {
+        let aux_reg = AUX_REG::AUX_ENABLES.as_mut_ptr::<u32>();
+        *aux_reg |= 0x1;
+    }
+    dev_barrier();
 }
 
 pub fn flush() {

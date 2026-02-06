@@ -1,0 +1,3 @@
+# GPIO Pin
+Pin 14 => TXD0 (ALT0) TXD1 (ALT5)
+Pin 15 => RXD0 (ALT0) RXD1 (ALT5)

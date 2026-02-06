@@ -198,6 +198,10 @@ fn main() {
             continue
         }
 
+        for i in read_buf[..n].iter() {
+            println!("{:08b}", i);
+        }
+
         let output = String::from_utf8_lossy(&read_buf[..n]);
         print!("{}", output);
     }
