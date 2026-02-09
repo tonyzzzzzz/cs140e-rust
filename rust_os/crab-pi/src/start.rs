@@ -15,7 +15,6 @@ unsafe extern "Rust" {
 extern "C" fn __kernel_start() {
     __user_main();
     crate::watchdog::restart()
-
 }
 
 // This copies what staff-start.S does:

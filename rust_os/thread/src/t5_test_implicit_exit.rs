@@ -1,4 +1,3 @@
-
 #![allow(static_mut_refs)] // TODO: better ways
 use alloc::boxed::Box;
 use crab_pi::println;
@@ -12,7 +11,7 @@ extern "C" fn thread_code(arg: *const u32) {
 
     println!("in thread tid = {} with x = {}", rpi_cur_thread_id(), x);
 
-    assert_eq!(rpi_cur_thread_id() as u32, x+1);
+    assert_eq!(rpi_cur_thread_id() as u32, x + 1);
 
     unsafe {
         thread_count += 1;
@@ -20,7 +19,7 @@ extern "C" fn thread_code(arg: *const u32) {
     }
 }
 
-pub fn t5_test_implicit_exit(){
+pub fn t5_test_implicit_exit() {
     let n = 30;
 
     let mut sum = 0;
@@ -38,4 +37,3 @@ pub fn t5_test_implicit_exit(){
     }
     println!("SUCCESS");
 }
-

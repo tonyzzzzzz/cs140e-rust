@@ -24,10 +24,10 @@ void *kmalloc_heap_start(void);
 // pointer to end of heap
 void *kmalloc_heap_end(void);
  */
-use core::alloc::{AllocError, Allocator, GlobalAlloc, Layout};
-use core::ptr::{with_exposed_provenance_mut, NonNull};
-use core::sync::atomic::{AtomicBool, Ordering};
 use crate::println;
+use core::alloc::{AllocError, Allocator, GlobalAlloc, Layout};
+use core::ptr::{NonNull, with_exposed_provenance_mut};
+use core::sync::atomic::{AtomicBool, Ordering};
 
 unsafe extern "C" {
     static __heap_start__: [u8; 0];
@@ -64,7 +64,7 @@ impl Default for KmallocAllocator {
     fn default() -> Self {
         let MB: usize = 1024 * 1024;
 
-        unsafe { kmalloc_init_set_start(with_exposed_provenance_mut(MB), 64*MB) };
+        unsafe { kmalloc_init_set_start(with_exposed_provenance_mut(MB), 64 * MB) };
         Self
     }
 }
@@ -72,8 +72,8 @@ impl Default for KmallocAllocator {
 unsafe impl Allocator for KmallocAllocator {
     fn allocate(&self, layout: Layout) -> Result<NonNull<[u8]>, AllocError> {
         let alignment = layout.align();
-        let start = unsafe {kmalloc_aligned(layout.size(), alignment) };
-        let non_null_arr = unsafe {NonNull::new_unchecked(start)};
+        let start = unsafe { kmalloc_aligned(layout.size(), alignment) };
+        let non_null_arr = unsafe { NonNull::new_unchecked(start) };
         Ok(NonNull::slice_from_raw_parts(non_null_arr, layout.size()))
     }
 
@@ -85,35 +85,56 @@ unsafe impl Allocator for KmallocAllocator {
         // NOP, does not support deallocation
     }
 
-    unsafe fn grow(&self, ptr: NonNull<u8>, old_layout: Layout, new_layout: Layout) -> Result<NonNull<[u8]>, AllocError> {
+    unsafe fn grow(
+        &self,
+        ptr: NonNull<u8>,
+        old_layout: Layout,
+        new_layout: Layout,
+    ) -> Result<NonNull<[u8]>, AllocError> {
         let alignment = new_layout.align();
-        let start = unsafe {kmalloc_aligned(new_layout.size(), alignment) };
+        let start = unsafe { kmalloc_aligned(new_layout.size(), alignment) };
         for i in 0..old_layout.size() {
             start.add(i).write(ptr.as_ptr().add(i).read());
         }
-        let non_null_arr = unsafe {NonNull::new_unchecked(start)};
+        let non_null_arr = unsafe { NonNull::new_unchecked(start) };
 
-        Ok(NonNull::slice_from_raw_parts(non_null_arr, new_layout.size()))
+        Ok(NonNull::slice_from_raw_parts(
+            non_null_arr,
+            new_layout.size(),
+        ))
     }
 
-    unsafe fn grow_zeroed(&self, ptr: NonNull<u8>, old_layout: Layout, new_layout: Layout) -> Result<NonNull<[u8]>, AllocError> {
+    unsafe fn grow_zeroed(
+        &self,
+        ptr: NonNull<u8>,
+        old_layout: Layout,
+        new_layout: Layout,
+    ) -> Result<NonNull<[u8]>, AllocError> {
         self.allocate_zeroed(new_layout)
     }
 
-    unsafe fn shrink(&self, ptr: NonNull<u8>, old_layout: Layout, new_layout: Layout) -> Result<NonNull<[u8]>, AllocError> {
+    unsafe fn shrink(
+        &self,
+        ptr: NonNull<u8>,
+        old_layout: Layout,
+        new_layout: Layout,
+    ) -> Result<NonNull<[u8]>, AllocError> {
         let alignment = new_layout.align();
-        let start = unsafe {kmalloc_aligned(new_layout.size(), alignment) };
+        let start = unsafe { kmalloc_aligned(new_layout.size(), alignment) };
         for i in 0..new_layout.size() {
             start.add(i).write(ptr.as_ptr().add(i).read());
         }
-        let non_null_arr = unsafe {NonNull::new_unchecked(start)};
+        let non_null_arr = unsafe { NonNull::new_unchecked(start) };
 
-        Ok(NonNull::slice_from_raw_parts(non_null_arr, new_layout.size()))
+        Ok(NonNull::slice_from_raw_parts(
+            non_null_arr,
+            new_layout.size(),
+        ))
     }
 
     fn by_ref(&self) -> &Self
     where
-        Self: Sized
+        Self: Sized,
     {
         self
     }

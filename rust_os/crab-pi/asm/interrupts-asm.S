@@ -44,25 +44,23 @@ disable_interrupts:
     bx lr
 
 
-@ the interrupt table that we copy to 0x0.
+@ the interrupt table
 @   - start = <_interrupt_table>
 @   - end = <_interrupt_table_end>
 @   - look at the disassembly
 @
-@ note: *it must be position independent since
-@ we copy it!*
 .globl _interrupt_table
-.globl _interrupt_table_end
+.align 5
 _interrupt_table:
   @ Q: why can we copy these ldr jumps and have
   @ them work the same?
   ldr pc, _reset_asm                    @ 0x0: Q: why this order?[A2-16]
   ldr pc, _undefined_instruction_asm    @ 0x4
-  ldr pc, _software_interrupt_asm       @ 0x8
+  b software_interrupt_asm              @ 0x8
   ldr pc, _prefetch_abort_asm
   ldr pc, _data_abort_asm
   ldr pc, _reset_asm
-  ldr pc, _interrupt_asm
+  b interrupt_asm
 fast_interrupt_asm:
   sub   lr, lr, #4 @First instr of FIQ handler
   push  {{lr}}
@@ -74,11 +72,8 @@ fast_interrupt_asm:
 
 _reset_asm:                   .word reset_asm
 _undefined_instruction_asm:   .word undefined_instruction_asm
-_software_interrupt_asm:      .word software_interrupt_asm
 _prefetch_abort_asm:          .word prefetch_abort_asm
 _data_abort_asm:              .word data_abort_asm
-_interrupt_asm:               .word interrupt_asm
-_interrupt_table_end:   @ end of the table.
 
 
 @ only handler that should run since we 

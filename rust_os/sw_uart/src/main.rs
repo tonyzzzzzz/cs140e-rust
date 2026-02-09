@@ -1,10 +1,10 @@
 #![no_std]
 #![no_main]
-mod sw_uart;
+pub mod sw_uart;
 
-use crab_pi::{println, uart};
-use crab_pi::uart::{disable_uart, enable_uart};
 use crate::sw_uart::SwUart;
+use crab_pi::uart::{disable_uart, enable_uart};
+use crab_pi::{println, uart};
 
 #[unsafe(no_mangle)]
 fn __user_main() {
@@ -20,7 +20,7 @@ fn __user_main() {
     uart.put_8(b'\n');
     uart.put_8(b'\n');
 
-    unsafe {uart::init(115200)}
+    unsafe { uart::init(115200) }
 
     println!("Done!");
 }

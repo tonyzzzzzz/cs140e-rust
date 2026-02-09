@@ -1,13 +1,13 @@
+use crate::interrupt::IRQ_REG;
+use crate::memory::dev_barrier;
+use crate::println;
+use crate::timer::ARM_TIMER::ARM_TIMER_CONTROL;
 use core::ptr::with_exposed_provenance;
 use core::time::Duration;
 use macros::{enum_ptr, enum_u32};
-use crate::println;
-use crate::interrupt::IRQ_ENABLE_BASIC;
-use crate::memory::dev_barrier;
-use crate::timer::ARM_TIMER::ARM_TIMER_CONTROL;
 
 const ARM_TIMER_BASE: u32 = 0x2000_B400;
-const ARM_TIMER_IRQ: usize = 1 << 0;
+const ARM_TIMER_IRQ: u32 = 1 << 0;
 const ARM_TIMER_CURRENT: *const u32 = with_exposed_provenance(0x2000_3004);
 
 enum_ptr! {
@@ -54,19 +54,25 @@ pub fn sleep(duration: Duration) {
 }
 
 pub unsafe fn clear_irq() {
-    ARM_TIMER::ARM_TIMER_IRQ_CLEAR.as_mut_ptr::<u32>().write_volatile(1);
+    ARM_TIMER::ARM_TIMER_IRQ_CLEAR
+        .as_mut_ptr::<u32>()
+        .write_volatile(1);
 }
 
 pub unsafe fn timer_init(prescale: u32, ncycles: u32) {
     println!("timer init");
 
     dev_barrier();
-    
-    *IRQ_ENABLE_BASIC = ARM_TIMER_IRQ as u32;
+
+    IRQ_REG::ENABLE_BASIC
+        .as_mut_ptr::<u32>()
+        .write_volatile(ARM_TIMER_IRQ);
 
     dev_barrier();
 
-    ARM_TIMER::ARM_TIMER_LOAD.as_mut_ptr::<u32>().write_volatile(ncycles);
+    ARM_TIMER::ARM_TIMER_LOAD
+        .as_mut_ptr::<u32>()
+        .write_volatile(ncycles);
 
     let v = match prescale {
         1 => ARM_TIMER_CTRL::ARM_TIMER_CTRL_PRESCALE_1,
@@ -74,8 +80,13 @@ pub unsafe fn timer_init(prescale: u32, ncycles: u32) {
         256 => ARM_TIMER_CTRL::ARM_TIMER_CTRL_PRESCALE_256,
         _ => panic!("unsupported prescale"),
     };
-    
-    ARM_TIMER_CONTROL.as_mut_ptr::<u32>().write_volatile(ARM_TIMER_CTRL::ARM_TIMER_CTRL_32BIT | ARM_TIMER_CTRL::ARM_TIMER_CTRL_ENABLE | ARM_TIMER_CTRL::ARM_TIMER_CTRL_INT_ENABLE | v);
+
+    ARM_TIMER_CONTROL.as_mut_ptr::<u32>().write_volatile(
+        ARM_TIMER_CTRL::ARM_TIMER_CTRL_32BIT
+            | ARM_TIMER_CTRL::ARM_TIMER_CTRL_ENABLE
+            | ARM_TIMER_CTRL::ARM_TIMER_CTRL_INT_ENABLE
+            | v,
+    );
 
     dev_barrier();
 }

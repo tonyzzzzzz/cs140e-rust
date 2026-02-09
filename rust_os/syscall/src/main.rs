@@ -1,8 +1,8 @@
 #![no_std]
 #![no_main]
 
-use crab_pi::interrupt::{cpsr_get, interrupt_init, SYS_MODE};
 use core::arch::global_asm;
+use crab_pi::interrupt::{SYS_MODE, cpsr_get, interrupt_init};
 use crab_pi::println;
 
 global_asm!(r#"
@@ -63,10 +63,10 @@ extern "C" fn user_fn() {
     println!("cpsr is at user level");
 
     println!("Calling syscall_hello from user mode");
-    unsafe {syscall_hello()};
+    unsafe { syscall_hello() };
 
     println!("Calling syscall_illegal from user mode");
-    unsafe {syscall_illegal()};
+    unsafe { syscall_illegal() };
 
     unreachable!()
 }
@@ -76,11 +76,13 @@ fn __user_main() {
     unsafe {
         interrupt_init();
 
-        println!("Calling user_fn with stack={:p}", USER_STACK.as_ptr().add(N));
+        println!(
+            "Calling user_fn with stack={:p}",
+            USER_STACK.as_ptr().add(N)
+        );
 
         run_user_code(user_fn, USER_STACK.as_ptr().add(N) as *const _ as *mut u32);
 
         unreachable!();
     }
-
 }

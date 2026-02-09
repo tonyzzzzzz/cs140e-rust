@@ -1,11 +1,13 @@
 #![no_std]
 #![no_main]
 
-use core::ptr::{addr_of, with_exposed_provenance_mut};
-use crab_pi::interrupt::{enable_interrupts, interrupt_init, register_irq_basic_handler, IRQ_ENABLE_BASIC};
+use core::ptr::addr_of;
+use crab_pi::interrupt::{
+    enable_interrupts, interrupt_init, register_irq_basic_handler,
+};
 use crab_pi::memory::dev_barrier;
-use crab_pi::{print, println};
 use crab_pi::timer::{clear_irq, timer_get_usec, timer_init};
+use crab_pi::{print, println};
 
 static mut cnt: u32 = 0;
 static mut period: u32 = 0;
@@ -20,15 +22,13 @@ fn timer_interrupt_handler(pc: u32) {
 
         cnt += 1;
         let clk = timer_get_usec();
-        period = if last_clk == 0 { 0 } else { clk - last_clk } ;
+        period = if last_clk == 0 { 0 } else { clk - last_clk };
         last_clk = clk;
         period_sum += period;
 
         dev_barrier();
     }
 }
-
-
 
 #[unsafe(no_mangle)]
 fn __user_main() {
@@ -51,7 +51,10 @@ fn __user_main() {
             let cnt_local = addr_of!(cnt).read_volatile();
             let period_local = addr_of!(period).read_volatile();
             let sum_local = addr_of!(period_sum).read_volatile();
-            println!("iter: {}, cnt: {}, period: {}, sum: {}", iter, cnt_local, period_local, sum_local);
+            println!(
+                "iter: {}, cnt: {}, period: {}, sum: {}",
+                iter, cnt_local, period_local, sum_local
+            );
             iter += 1;
         }
 
@@ -66,9 +69,11 @@ fn __user_main() {
         print!("summary:\n");
         print!("\t{}: total iterations\n", iter);
         print!("\t{}: tot interrupts\n", 20);
-        print!("\t{}: iterations / interrupt\n", iter/20);
-        print!("\t{}: average period\n\n", period_sum/(20-1));
-        print!("total execution time: {}sec.{}ms.{}usec\n",
-               tot_sec, tot_ms, tot_usec);
+        print!("\t{}: iterations / interrupt\n", iter / 20);
+        print!("\t{}: average period\n\n", period_sum / (20 - 1));
+        print!(
+            "total execution time: {}sec.{}ms.{}usec\n",
+            tot_sec, tot_ms, tot_usec
+        );
     }
 }

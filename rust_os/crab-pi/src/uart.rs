@@ -1,8 +1,8 @@
-use core::time::Duration;
-use macros::enum_ptr;
-use crate::gpio::{gpio_set_function, GPIO_FUNC};
+use crate::gpio::{GPIO_FUNC, gpio_set_function};
 use crate::memory::{dev_barrier, dsb};
 use crate::timer::timer_get_usec;
+use core::time::Duration;
+use macros::enum_ptr;
 
 const AUX_BASE_ADDR: u32 = 0x2021_5000;
 
@@ -42,37 +42,51 @@ pub unsafe fn init(baud_rate: u32) {
     /*
     Mini UART Extra Control = 0
      */
-    AUX_REG::AUX_MU_CNTL_REG.as_mut_ptr::<u32>().write_volatile(0);
+    AUX_REG::AUX_MU_CNTL_REG
+        .as_mut_ptr::<u32>()
+        .write_volatile(0);
 
     /*
     Mini UART Interrupt Identify[0x48] = 0x6
      */
-    AUX_REG::AUX_MU_IIR_REG.as_mut_ptr::<u32>().write_volatile(0x6);
+    AUX_REG::AUX_MU_IIR_REG
+        .as_mut_ptr::<u32>()
+        .write_volatile(0x6);
 
     /*
     Mini UART Line Control[0x4c] = 0x3
      */
-    AUX_REG::AUX_MU_LCR_REG.as_mut_ptr::<u32>().write_volatile(0x3);
+    AUX_REG::AUX_MU_LCR_REG
+        .as_mut_ptr::<u32>()
+        .write_volatile(0x3);
 
     /*
     Mini UART Modem Control[0x50] = 0
      */
-    AUX_REG::AUX_MU_MCR_REG.as_mut_ptr::<u32>().write_volatile(0);
+    AUX_REG::AUX_MU_MCR_REG
+        .as_mut_ptr::<u32>()
+        .write_volatile(0);
 
     /*
     Mini UART Baud Rate[0x68] = baud_rate (hard coded to 0x10e)
      */
-    AUX_REG::AUX_MU_BAUD_REG.as_mut_ptr::<u32>().write_volatile(0x10e);
+    AUX_REG::AUX_MU_BAUD_REG
+        .as_mut_ptr::<u32>()
+        .write_volatile(0x10e);
 
     /*
     Mini UART Interrupt Enable = 0
      */
-    AUX_REG::AUX_MU_IER_REG.as_mut_ptr::<u32>().write_volatile(0);
+    AUX_REG::AUX_MU_IER_REG
+        .as_mut_ptr::<u32>()
+        .write_volatile(0);
 
     /*
     Mini UART Extra Control = 3
      */
-    AUX_REG::AUX_MU_CNTL_REG.as_mut_ptr::<u32>().write_volatile(0x3);
+    AUX_REG::AUX_MU_CNTL_REG
+        .as_mut_ptr::<u32>()
+        .write_volatile(0x3);
 
     dsb();
 }
@@ -99,27 +113,20 @@ pub fn enable_uart() {
 pub fn flush() {
     dsb();
     let stat_reg = AUX_REG::AUX_MU_STAT_REG.as_ptr::<u32>();
-    unsafe {
-        while (stat_reg.read_volatile() & 0x200 == 0x0) {
-        }
-    }
+    unsafe { while (stat_reg.read_volatile() & 0x200 == 0x0) {} }
     dsb();
 }
 
 #[inline(always)]
 pub fn can_write() -> bool {
     let state_reg = AUX_REG::AUX_MU_STAT_REG.as_ptr::<u32>();
-    unsafe {
-        (state_reg.read_volatile() & 0x2) != 0
-    }
+    unsafe { (state_reg.read_volatile() & 0x2) != 0 }
 }
 
 #[inline(always)]
 pub fn can_read() -> bool {
     let state_reg = AUX_REG::AUX_MU_STAT_REG.as_ptr::<u32>();
-    unsafe {
-        (state_reg.read_volatile() & 0x1) != 0
-    }
+    unsafe { (state_reg.read_volatile() & 0x1) != 0 }
 }
 
 pub fn can_read_timeout(timeout: Duration) -> bool {

@@ -1,5 +1,5 @@
-use core::arch::{asm, global_asm};
 use crate::kmalloc::KmallocAllocator;
+use core::arch::{asm, global_asm};
 
 #[global_allocator]
 static GLOBAL: KmallocAllocator = KmallocAllocator;

@@ -1,5 +1,10 @@
 #![no_std]
 #![no_main]
+pub use paste::paste;
+
+pub mod cp;
+pub use cp::*;
+
 #[macro_export]
 macro_rules! enum_ptr {
     ($(#[$m:meta])* $vis:vis enum $Name:ident { $($V:ident = $n:expr,)* }) => {

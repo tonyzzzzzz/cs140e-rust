@@ -1,7 +1,6 @@
 #![no_std]
 #![no_main]
 
-
 use crab_pi::libpi::delay_cycles;
 
 use crab_pi::gpio::*;
@@ -43,17 +42,17 @@ fn _3_loopback() {
     gpio_set_output(LED_2);
     gpio_set_input(INPUT);
     gpio_set_output(OUTPUT);
-    
+
     let mut v = false;
-    
+
     loop {
         gpio_write(LED_1, v);
-        
+
         gpio_write(OUTPUT, v);
         gpio_write(LED_2, gpio_read(INPUT));
-        
+
         delay_cycles(1000000);
-        
+
         v = !v;
     }
 }
@@ -91,4 +90,3 @@ fn __user_main() {
     println!("Hello World");
     _4_act_blink();
 }
-

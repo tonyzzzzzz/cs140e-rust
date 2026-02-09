@@ -56,7 +56,7 @@ void notmain(void) {
 
  */
 use alloc::boxed::Box;
-use crab_pi::gpio::{gpio_set_function, gpio_set_off, gpio_set_on, GPIO_FUNC};
+use crab_pi::gpio::{GPIO_FUNC, gpio_set_function, gpio_set_off, gpio_set_on};
 use crab_pi::println;
 use crab_pi::thread::{rpi_fork, rpi_thread_start, rpi_yield};
 use crab_pi::timer::timer_get_usec;
@@ -71,7 +71,7 @@ fn wait_usec(n: u32) {
     let start = unsafe { timer_get_usec() };
 
     loop {
-        if unsafe {timer_get_usec()} - start >= n {
+        if unsafe { timer_get_usec() } - start >= n {
             return;
         }
         rpi_yield();
@@ -79,7 +79,7 @@ fn wait_usec(n: u32) {
 }
 
 extern "C" fn blink(arg: *const u32) {
-    let duty = unsafe {Box::from_raw(arg as *mut pwm)};
+    let duty = unsafe { Box::from_raw(arg as *mut pwm) };
 
     gpio_set_function(duty.pin, GPIO_FUNC::OUTPUT);
     assert!(duty.duty > 0 && duty.duty <= 100);
@@ -87,7 +87,7 @@ extern "C" fn blink(arg: *const u32) {
     let on_usec = duty.duty;
     let off_usec = 100 - duty.duty;
 
-    for i in 0..1000{
+    for i in 0..1000 {
         gpio_set_on(duty.pin);
         wait_usec(on_usec);
 
@@ -97,8 +97,8 @@ extern "C" fn blink(arg: *const u32) {
 }
 
 pub fn t7_realtime_yield() {
-    let t75 = Box::new(pwm {duty: 75, pin: 20});
-    let t25 = Box::new(pwm {duty: 25, pin: 21});
+    let t75 = Box::new(pwm { duty: 75, pin: 20 });
+    let t25 = Box::new(pwm { duty: 25, pin: 21 });
 
     rpi_fork(blink, Box::into_raw(t75) as *const u32);
     rpi_fork(blink, Box::into_raw(t25) as *const u32);

@@ -1,0 +1,22 @@
+[package]
+name = "gpio-int"
+version = "0.1.0"
+edition = "2024"
+
+[[bin]]
+name = "gpio-int"
+path = "src/gpio_int.rs"
+test = false
+doctest = false
+bench = false
+
+[[bin]]
+name = "logic-analyzer"
+path = "src/logic_analyzer.rs"
+test = false
+doctest = false
+bench = false
+
+[dependencies]
+crab-pi = { path = "../crab-pi" }
+sw_uart = {path = "../sw_uart"}

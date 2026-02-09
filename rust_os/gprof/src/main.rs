@@ -6,7 +6,9 @@ extern crate alloc;
 use alloc::vec;
 use alloc::vec::Vec;
 use core::mem::MaybeUninit;
-use crab_pi::interrupt::{enable_interrupts, interrupt_init, register_irq_basic_handler, IrqHandler};
+use crab_pi::interrupt::{
+    IrqHandler, enable_interrupts, interrupt_init, register_irq_basic_handler,
+};
 use crab_pi::memory::dev_barrier;
 use crab_pi::println;
 use crab_pi::timer::{clear_irq, timer_get_usec, timer_init};
@@ -26,7 +28,7 @@ static mut CODE_SIZE: u32 = 0;
 fn gprof_init() {
     unsafe {
         let code_start = &__code_start__ as *const u32;
-        let code_end = &__code_end__  as *const u32;
+        let code_end = &__code_end__ as *const u32;
         let mut code_size = code_end as usize - code_start as usize;
         code_size /= 4;
         println!("code size: {}", code_size);
@@ -50,7 +52,7 @@ unsafe fn gprof_dump(min_val: u32) {
         let val = GPROF_COUNTS.add(i as usize).read_volatile();
         if (val >= min_val) {
             let loc = i * 4 + (&__code_start__ as *const u32 as u32);
-            println!("{:08x}: {}", loc , val);
+            println!("{:08x}: {}", loc, val);
         }
     }
 }
@@ -66,7 +68,7 @@ fn timer_interrupt_handler(pc: u32) {
 
         // Old counter
         let clk = timer_get_usec();
-        period = if last_clk == 0 { 0 } else { clk - last_clk } ;
+        period = if last_clk == 0 { 0 } else { clk - last_clk };
         last_clk = clk;
 
         dev_barrier();
@@ -74,7 +76,7 @@ fn timer_interrupt_handler(pc: u32) {
 }
 
 #[unsafe(no_mangle)]
- fn __user_main() {
+fn __user_main() {
     unsafe {
         gprof_init();
 
@@ -86,22 +88,21 @@ fn timer_interrupt_handler(pc: u32) {
 
         enable_interrupts();
 
-        println!("Kmalloc initialized. code start: {:p}, code end: {:p}", &__code_start__, &__code_end__);
+        println!(
+            "Kmalloc initialized. code start: {:p}, code end: {:p}",
+            &__code_start__, &__code_end__
+        );
     }
-
 
     unsafe {
         let mut iter = 0;
         while (cnt < 1000) {
             // println!("iter={}; cnt={}, period={}", iter, addr_of!(cnt).read_volatile(), addr_of!(period).read_volatile());
-            iter+=1;
+            iter += 1;
             // if (iter % 10 == 0){
             //     gprof_dump(2);
             // }
         }
         gprof_dump(1);
-
     }
-
-
 }

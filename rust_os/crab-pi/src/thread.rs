@@ -1,15 +1,15 @@
 #![allow(static_mut_refs)] // TODO: better ways
 
-use alloc::boxed::Box;
-use alloc::string::{String, ToString};
-use core::ptr::null;
 use crate::println;
+use alloc::boxed::Box;
 use alloc::collections::VecDeque;
+use alloc::string::{String, ToString};
 use core::arch::global_asm;
+use core::ptr::null;
 
 type RPIThreadExecFn = extern "C" fn(*const u32);
 
-const THREAD_MAX_STACKSIZE: usize = (1024 * 8/4);
+const THREAD_MAX_STACKSIZE: usize = (1024 * 8 / 4);
 
 static mut THREAD_ID_COUNTER: usize = 1;
 
@@ -29,14 +29,13 @@ unsafe extern "C" {
 
 #[repr(align(8))]
 #[derive(Clone)]
-struct Align8<T> (pub T);
+struct Align8<T>(pub T);
 
 // #[derive(Clone)]
 pub struct RPIThread {
     saved_sp: *const u32,
 
     pub thread_id: usize,
-
 
     annot: String,
 
@@ -65,7 +64,7 @@ pub fn rpi_thread_start() {
         println!("&RUN_Q={:p}", core::ptr::addr_of!(RUN_Q));
         println!("RUN_Q size: {}", RUN_Q.len());
 
-        let next_thread =RUN_Q.pop_front().unwrap();
+        let next_thread = RUN_Q.pop_front().unwrap();
         println!("next_thread");
         let sched = SCHEDULER_THREAD.as_mut().unwrap();
         let sched_saved_sp_addr: *mut *const u32 = &mut sched.saved_sp;
@@ -76,7 +75,6 @@ pub fn rpi_thread_start() {
         CUR_THREAD = Some(next_thread);
         rpi_cswitch(sched_saved_sp_addr, next_thread_sp)
     }
-
 }
 
 pub fn rpi_fork(f: RPIThreadExecFn, arg: *const u32) {
@@ -107,7 +105,10 @@ pub fn rpi_fork(f: RPIThreadExecFn, arg: *const u32) {
         sp_now.write_volatile(f as u32);
 
         new_thread.as_mut().saved_sp = sp_now;
-        println!("rpi_fork: tid={}, code={:p}, arg={:p}, saved_sp={:p}", new_thread.thread_id, f, arg, new_thread.saved_sp);
+        println!(
+            "rpi_fork: tid={}, code={:p}, arg={:p}, saved_sp={:p}",
+            new_thread.thread_id, f, arg, new_thread.saved_sp
+        );
 
         println!("&RUN_Q={:p}", core::ptr::addr_of!(RUN_Q));
         RUN_Q.push_back(new_thread);
@@ -115,8 +116,11 @@ pub fn rpi_fork(f: RPIThreadExecFn, arg: *const u32) {
         println!("sp[1] = {:x}", sp_now.read_volatile());
         println!("sp[2] = {:x}", sp_now.add(1).read_volatile());
         println!("lr = {:x}", sp_now.add(9).read_volatile());
-        println!("lr = {:x}, trampoline = {:p}", sp_now.add(9).read_volatile(), rpi_init_trampoline as *const ());
-
+        println!(
+            "lr = {:x}, trampoline = {:p}",
+            sp_now.add(9).read_volatile(),
+            rpi_init_trampoline as *const ()
+        );
     }
 }
 
@@ -129,7 +133,7 @@ pub fn rpi_cur_thread_id() -> usize {
 // }
 
 #[unsafe(no_mangle)]
-pub extern "C" fn rpi_exit(exit_code: i32){
+pub extern "C" fn rpi_exit(exit_code: i32) {
     unsafe {
         println!("Thread exiting with code {}", exit_code);
 
@@ -141,13 +145,12 @@ pub extern "C" fn rpi_exit(exit_code: i32){
                 let next_sp = x.saved_sp.clone();
                 CUR_THREAD = Some(x);
                 next_sp
-            },
+            }
             None => SCHEDULER_THREAD.as_mut().unwrap().saved_sp.clone(),
         };
 
         rpi_cswitch(previous_thread_sp, next_thread_sp)
     }
-
 }
 
 pub fn rpi_yield() {

@@ -1,14 +1,10 @@
 [package]
-name = "sw_uart"
+name = "vector_base"
 version = "0.1.0"
 edition = "2024"
 
-[lib]
-name = "sw_uart"
-path = "src/lib.rs"
-
 [[bin]]
-name = "sw_uart"
+name = "vector_base"
 path = "src/main.rs"
 test = false
 doctest = false
