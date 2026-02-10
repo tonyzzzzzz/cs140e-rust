@@ -119,7 +119,7 @@ fn main() {
     /*
        READ PROGRAM
     */
-    let program = read_code(&args.kernel).expect("Failed to read program");
+    let program = read_code(&args.kernel).expect(format!("Failed to read program at {}", args.kernel.display()).as_str() );
     let crc_32 = crc32fast::hash(&program);
     let nbytes = program.len();
     println!("Program size: {} bytes, crc32={:x}", nbytes, crc_32);
@@ -197,6 +197,7 @@ fn main() {
             sleep(Duration::from_micros(1000));
             continue
         }
+
         let output = String::from_utf8_lossy(&read_buf[..n]);
         print!("{}", output);
     }

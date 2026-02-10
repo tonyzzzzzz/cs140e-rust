@@ -16,4 +16,5 @@ arm-none-eabi-objcopy "$elf_path" -O binary "$bin_path"
 arm-none-eabi-objdump -D "$elf_path" > "$list_path"
 echo "Created $bin_path from $elf_path"
 # RUST_LOG=info okdude -l $load_addr "$bin_path"
-pi-install "$bin_path"
+cd ../pi-install
+cargo run -p pi-install -- "../rust_os/$bin_path"
