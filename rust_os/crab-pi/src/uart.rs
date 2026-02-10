@@ -21,6 +21,10 @@ enum_ptr! {
     }
 }
 
+const fn baud_to_reg(baud_rate: u32) -> u32 {
+    constants::SYSTEM_CLOCK_FREQUENCY / baud_rate / 8 - 1
+}
+
 pub unsafe fn init(baud_rate: u32) {
     /*
     INITIALIZE GPIO PIN 14-15 to ALT5
@@ -72,7 +76,7 @@ pub unsafe fn init(baud_rate: u32) {
      */
     AUX_REG::AUX_MU_BAUD_REG
         .as_mut_ptr::<u32>()
-        .write_volatile(0x10e);
+        .write_volatile(baud_to_reg(baud_rate));
 
     /*
     Mini UART Interrupt Enable = 0

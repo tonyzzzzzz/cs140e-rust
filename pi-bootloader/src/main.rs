@@ -7,7 +7,7 @@ use core::arch::{asm, global_asm};
 use core::ptr::with_exposed_provenance_mut;
 use core::time::Duration;
 use crab_pi::{println, uart, watchdog};
-use constants::BOOT_OP;
+use constants::{BOOT_OP, UART_BAUD_RATE};
 use crab_pi::cycle_count::cycle_cnt_init;
 use crab_pi::memory::gcc_mb;
 use crab_pi::timer::sleep;
@@ -43,7 +43,7 @@ extern "C" fn _cstart() {
     unsafe {
         zero_out_bss();
 
-        uart::init(115200);
+        uart::init(UART_BAUD_RATE);
 
         cycle_cnt_init();
 

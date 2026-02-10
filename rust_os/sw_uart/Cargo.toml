@@ -16,3 +16,4 @@ bench = false
 
 [dependencies]
 crab-pi = { path = "../crab-pi" }
+constants = {path = "../../shared/constants"}

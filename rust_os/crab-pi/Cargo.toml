@@ -10,3 +10,4 @@ start-asm = []
 [dependencies]
 log = "0.4.29"
 macros = { path = '../../shared/macros' }
+constants = { path = '../../shared/constants' }

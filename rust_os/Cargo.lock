@@ -3,9 +3,17 @@
 version = 4
 
 [[package]]
+name = "constants"
+version = "0.1.0"
+dependencies = [
+ "macros",
+]
+
+[[package]]
 name = "crab-pi"
 version = "0.1.0"
 dependencies = [
+ "constants",
  "log",
  "macros",
 ]
@@ -55,6 +63,7 @@ checksum = "57c0d7b74b563b49d38dae00a0c37d4d6de9b432382b2892f0574ddcae73fd0a"
 name = "sw_uart"
 version = "0.1.0"
 dependencies = [
+ "constants",
  "crab-pi",
 ]
 

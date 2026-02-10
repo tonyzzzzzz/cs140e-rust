@@ -2,6 +2,7 @@
 #![no_main]
 pub mod sw_uart;
 
+use constants::UART_BAUD_RATE;
 use crate::sw_uart::SwUart;
 use crab_pi::uart::{disable_uart, enable_uart};
 use crab_pi::{println, uart};
@@ -10,7 +11,7 @@ use crab_pi::{println, uart};
 fn __user_main() {
     disable_uart();
 
-    let uart = SwUart::new(14, 15, 115200);
+    let uart = SwUart::new(14, 15, UART_BAUD_RATE);
     uart.put_8(b'H');
     uart.put_8(b'e');
     uart.put_8(b'l');
@@ -20,7 +21,7 @@ fn __user_main() {
     uart.put_8(b'\n');
     uart.put_8(b'\n');
 
-    unsafe { uart::init(115200) }
+    unsafe { uart::init(UART_BAUD_RATE) }
 
     println!("Done!");
 }

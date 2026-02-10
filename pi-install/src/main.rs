@@ -3,7 +3,7 @@ extern crate core;
 use bytes::{BufMut, BytesMut};
 use clap::Parser;
 use constants::BOOT_OP::{PUT_CODE, PUT_PROG_INFO};
-use constants::{ARM_BASE, BOOT_OP};
+use constants::{ARM_BASE, BOOT_OP, UART_BAUD_RATE};
 use serialport::Error;
 use std::fs;
 use std::io::Read;
@@ -13,7 +13,7 @@ use std::time::Duration;
 
 #[derive(Parser, Debug)]
 struct PiInstall {
-    #[arg(short, long, default_value = "115200")]
+    #[arg(short, long, default_value_t = UART_BAUD_RATE)]
     baud: u32,
 
     #[arg(short, long, default_value = "0x8000")]
@@ -197,11 +197,6 @@ fn main() {
             sleep(Duration::from_micros(1000));
             continue
         }
-
-        for i in read_buf[..n].iter() {
-            println!("{:08b}", i);
-        }
-
         let output = String::from_utf8_lossy(&read_buf[..n]);
         print!("{}", output);
     }
