@@ -98,4 +98,6 @@ fn __user_main() {
 
         assert_eq!(result, 0b01010101);
     }
+    
+    println!("Done")
 }
