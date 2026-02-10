@@ -13,6 +13,6 @@ unsafe extern "C" {
 }
 
 #[inline]
-pub unsafe fn gcc_mb() {
-    asm!("", options(nostack));
+pub fn gcc_mb() {
+    unsafe {asm!("", options(nostack))};
 }

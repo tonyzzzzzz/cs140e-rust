@@ -3,7 +3,7 @@
 
 use macros::enum_u32;
 
-pub const UART_BAUD_RATE: u32 = 115200;
+pub const UART_BAUD_RATE: u32 = 921600;
 pub const SYSTEM_CLOCK_FREQUENCY: u32 = 250_000_000;
 pub const ARM_BASE: u32 = 0x8000;
 

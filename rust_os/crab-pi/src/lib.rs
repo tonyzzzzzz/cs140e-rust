@@ -1,6 +1,7 @@
 #![feature(c_variadic)]
 #![feature(allocator_api)]
 #![feature(sync_unsafe_cell)]
+#![feature(generic_const_exprs)]
 #![no_std]
 #![no_main]
 extern crate alloc;
@@ -25,3 +26,4 @@ pub mod timer;
 pub mod uart;
 pub mod vector_base;
 pub mod watchdog;
+pub mod mailbox;
