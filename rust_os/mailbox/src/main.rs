@@ -2,6 +2,7 @@
 #![no_main]
 
 use crab_pi::{mailbox, println};
+use crab_pi::mailbox::RpiClockType;
 
 #[unsafe(no_mangle)]
 fn __user_main() {
@@ -10,4 +11,9 @@ fn __user_main() {
     println!("mailbox board revision = {:x}", mailbox::mbox_get_revision());
     println!("mailbox board memory = {}MB", mailbox::mbox_get_memory()/1000000);
     println!("mailbox temperature = {}degrees", mailbox::mbox_get_temperature() / 1000);
+
+    println!("mailbox current hz = {}", mailbox::rpi_clock_current_hz_get(RpiClockType::CPU));
+    println!("mailbox max hz = {}", mailbox::rpi_clock_max_hz_get(RpiClockType::CPU));
+    println!("mailbox min hz = {}", mailbox::rpi_clock_min_hz_get(RpiClockType::CPU));
+    println!("mailbox real hz = {}", mailbox::rpi_clock_real_hz_get(RpiClockType::CPU));
 }

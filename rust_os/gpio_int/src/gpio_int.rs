@@ -64,8 +64,6 @@ fn __user_main() {
         unsafe {assert_eq!(i, falling_edge_count)};
 
         gpio_write(OUT_PIN, true);
-        dev_barrier();
-
         unsafe {
             assert_eq!(i, rising_edge_count);
             assert_eq!(falling_edge_count, rising_edge_count);
