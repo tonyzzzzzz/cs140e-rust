@@ -1,6 +1,6 @@
-use macros::{enum_ptr, enum_u32};
 use crate::memory::{dev_barrier, gcc_mb};
 use crate::println;
+use macros::{enum_ptr, enum_u32};
 
 const MBOX_CHANNEL: u32 = 8;
 const GPU_MEM_OFFSET: u32 = 0x40000000;
@@ -32,7 +32,7 @@ struct MailBoxMsg<const N: usize> {
     tag_value_buffer_size: u32,
     tag_req_resp_code: u32,
     value_buf: [u8; N],
-    end_tag: u32
+    end_tag: u32,
 }
 
 impl<const N: usize> MailBoxMsg<N> {
@@ -46,7 +46,7 @@ impl<const N: usize> MailBoxMsg<N> {
             tag_value_buffer_size: N as u32,
             tag_req_resp_code: 0,
             value_buf: [0u8; N],
-            end_tag: 0
+            end_tag: 0,
         }
     }
 
@@ -79,7 +79,9 @@ fn mbox_write(data: *const u32) {
         while MBOX_REG::STATUS.as_ptr::<u32>().read_volatile() & MBOX_STATUS::FULL.val() != 0 {}
 
         // Write the data
-        MBOX_REG::WRITE.as_mut_ptr::<u32>().write_volatile(data_addr | GPU_MEM_OFFSET | MBOX_CHANNEL);
+        MBOX_REG::WRITE
+            .as_mut_ptr::<u32>()
+            .write_volatile(data_addr | GPU_MEM_OFFSET | MBOX_CHANNEL);
     }
 
     dev_barrier();
@@ -190,39 +192,11 @@ pub fn rpi_clock_current_hz_get(rpi_clock_type: RpiClockType) -> u32 {
     u32::from_le_bytes(result[4..].try_into().unwrap())
 }
 
-pub fn rpi_clock_real_hz_get(rpi_clock_type: RpiClockType) -> u32 {
-    let mut msg = MailBoxMsg::<8>::new(0x00030047);
-    msg.set_value(&u32::to_le_bytes(rpi_clock_type as u32));
-
-    let ptr = msg.as_ptr();
-
-    unsafe{
-        for i in 0..8 {
-            println!("msg[{}]={:08x}", i, ptr.add(i).read_volatile())
-        }
-    }
-
-    mbox_send(&msg);
-
-    let result = msg.get_value();
-
-    u32::from_le_bytes(result[4..].try_into().unwrap())
-}
-
 pub fn rpi_clock_max_hz_get(rpi_clock_type: RpiClockType) -> u32 {
     let mut msg = MailBoxMsg::<8>::new(0x00030004);
     msg.set_value(&u32::to_le_bytes(rpi_clock_type as u32));
-    let ptr = msg.as_ptr();
 
-    unsafe{
-        for i in 0..8 {
-            println!("msg[{}]={:08x}", i, ptr.add(i).read_volatile())
-        }
-    }
-    
     mbox_send(&msg);
-
-
 
     let result = msg.get_value();
     u32::from_le_bytes(result[4..].try_into().unwrap())
@@ -237,7 +211,29 @@ pub fn rpi_clock_min_hz_get(rpi_clock_type: RpiClockType) -> u32 {
     u32::from_le_bytes(result[4..].try_into().unwrap())
 }
 
-pub fn rpi_clock_hz_set(rpi_clock_type: RpiClockType, hz: u32) {
+pub fn rpi_clock_hz_set(rpi_clock_type: RpiClockType, hz: u32) -> u32{
+    let mut msg = MailBoxMsg::<12>::new(0x00038002);
+    let clock_type = u32::to_le_bytes(rpi_clock_type as u32);
+    let new_rate = u32::to_le_bytes(hz);
 
+    let new_value = [
+        clock_type[0],
+        clock_type[1],
+        clock_type[2],
+        clock_type[3],
+        new_rate[0],
+        new_rate[1],
+        new_rate[2],
+        new_rate[3],
+    ];
+
+    msg.set_value(&new_value);
+
+    mbox_send(&msg);
+
+    let result = msg.get_value();
+
+    println!("{:?}", msg);
+
+    u32::from_le_bytes(result[4..8].try_into().unwrap())
 }
-

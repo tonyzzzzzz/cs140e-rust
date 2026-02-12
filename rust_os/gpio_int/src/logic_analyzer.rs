@@ -10,12 +10,15 @@ use core::cell::SyncUnsafeCell;
 use core::time::Duration;
 use crab_pi::cache::caches_enable;
 use crab_pi::cycle_count::cycle_cnt_read;
-use crab_pi::gpio::{gpio_int_falling_edge, gpio_int_rising_edge, gpio_interrupt_enable, gpio_interrupt_init, gpio_register_interrupt_handler, gpio_set_function, gpio_write, GPIOEvent, GPIO_FUNC};
+use crab_pi::gpio::{
+    GPIO_FUNC, GPIOEvent, gpio_int_falling_edge, gpio_int_rising_edge, gpio_interrupt_enable,
+    gpio_interrupt_init, gpio_register_interrupt_handler, gpio_set_function, gpio_write,
+};
 use crab_pi::interrupt::{enable_interrupts, interrupt_init};
 use crab_pi::memory::dev_barrier;
 use crab_pi::println;
 use crab_pi::timer::sleep;
-use sw_uart::sw_uart::{baud_to_cycles, SwUart};
+use sw_uart::sw_uart::{SwUart, baud_to_cycles};
 
 const OUT_PIN: u32 = 21;
 const IN_PIN: u32 = 20;
@@ -25,7 +28,11 @@ static mut BUFFER: SyncUnsafeCell<VecDeque<(u8, u32)>> = SyncUnsafeCell::new(Vec
 
 fn gpio_handler(pin: u32, event: GPIOEvent) {
     let time = cycle_cnt_read();
-    let val: u8 = if matches!(event, GPIOEvent::RisingEdge) { 1 } else { 0 };
+    let val: u8 = if matches!(event, GPIOEvent::RisingEdge) {
+        1
+    } else {
+        0
+    };
 
     unsafe { BUFFER.get_mut().push_back((val, time)) };
 }
@@ -76,9 +83,8 @@ fn __user_main() {
 
     println!("Cycles per bit: {}", uart.get_cycles_per_bit());
 
-
     // Initialize Interrupts
-    unsafe{
+    unsafe {
         interrupt_init();
         caches_enable();
 
@@ -89,15 +95,14 @@ fn __user_main() {
         enable_interrupts();
     }
 
-
     for _ in 0..2 {
         uart.put_8(0b01010101);
         sleep(Duration::from_millis(100));
 
-        let result = unsafe {get_8()};
+        let result = unsafe { get_8() };
 
         assert_eq!(result, 0b01010101);
     }
-    
+
     println!("Done")
 }

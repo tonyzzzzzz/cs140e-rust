@@ -10,5 +10,12 @@ test = false
 doctest = false
 bench = false
 
+[[bin]]
+name = "overclock"
+path = "src/overclock.rs"
+test = false
+doctest = false
+bench = false
+
 [dependencies]
 crab-pi = { path = "../crab-pi" }

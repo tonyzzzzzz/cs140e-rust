@@ -1,8 +1,8 @@
-use core::cell::SyncUnsafeCell;
-use crate::interrupt::{register_irq_2_handler, IrqHandler, IRQ_REG};
+use crate::interrupt::{IRQ_REG, IrqHandler, register_irq_2_handler};
 use crate::memory::dev_barrier;
-use macros::{enum_ptr, enum_u32};
 use crate::println;
+use core::cell::SyncUnsafeCell;
+use macros::{enum_ptr, enum_u32};
 
 const GPIO_BASE_ADDR: u32 = 0x2020_0000;
 
@@ -145,7 +145,8 @@ pub enum GPIOEvent {
     RisingEdge,
     FallingEdge,
 }
-static GPIO_INT_HANDLER: SyncUnsafeCell<[fn(u32, GPIOEvent); 32]> = SyncUnsafeCell::new([default_gpio_handler; 32]);
+static GPIO_INT_HANDLER: SyncUnsafeCell<[fn(u32, GPIOEvent); 32]> =
+    SyncUnsafeCell::new([default_gpio_handler; 32]);
 
 pub fn gpio_has_interrupt() -> bool {
     dev_barrier();
@@ -243,7 +244,7 @@ pub fn gpio_interrupt_disable() {
 }
 
 fn gpio_irq_handler(pc: u32) {
-    let mut eds_val = unsafe {GPIO_REG::EDS0.as_ptr::<u32>().read_volatile()};
+    let mut eds_val = unsafe { GPIO_REG::EDS0.as_ptr::<u32>().read_volatile() };
 
     let handlers = unsafe { &*GPIO_INT_HANDLER.get() };
 

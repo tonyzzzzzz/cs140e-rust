@@ -2,8 +2,8 @@
 #![no_main]
 pub mod sw_uart;
 
-use constants::UART_BAUD_RATE;
 use crate::sw_uart::SwUart;
+use constants::UART_BAUD_RATE;
 use crab_pi::uart::{disable_uart, enable_uart};
 use crab_pi::{println, uart};
 

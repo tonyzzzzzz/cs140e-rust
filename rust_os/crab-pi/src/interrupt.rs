@@ -1,13 +1,13 @@
 use crate::constant::INT_STACK_ADDR;
+use crate::cycle_count::cycle_cnt_read;
 use crate::memory::{dev_barrier, gcc_mb};
 use crate::println;
+use crate::vector_base::vector_base_reset;
 use crate::watchdog::clean_reboot;
 use core::arch::{asm, global_asm};
 use core::ptr::{with_exposed_provenance, with_exposed_provenance_mut};
 use log::trace;
 use macros::{enum_ptr, enum_u32};
-use crate::cycle_count::cycle_cnt_read;
-use crate::vector_base::vector_base_reset;
 
 enum_u32! {
     pub enum SYS_MODE {

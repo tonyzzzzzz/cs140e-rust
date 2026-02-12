@@ -35,15 +35,18 @@ enum_u32! {
     }
 }
 
-unsafe fn timer_get_usec_raw() -> u32 {
+#[inline(always)]
+pub unsafe fn timer_get_usec_raw() -> u32 {
     ARM_TIMER_CURRENT.read_volatile()
 }
 
-pub unsafe fn timer_get_usec() -> u32 {
-    dev_barrier();
-    let u = timer_get_usec_raw();
-    dev_barrier();
-    u
+pub fn timer_get_usec() -> u32 {
+    unsafe {
+        dev_barrier();
+        let u = timer_get_usec_raw();
+        dev_barrier();
+        u
+    }
 }
 
 pub fn sleep(duration: Duration) {

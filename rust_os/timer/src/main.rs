@@ -2,9 +2,7 @@
 #![no_main]
 
 use core::ptr::addr_of;
-use crab_pi::interrupt::{
-    enable_interrupts, interrupt_init, register_irq_basic_handler,
-};
+use crab_pi::interrupt::{enable_interrupts, interrupt_init, register_irq_basic_handler};
 use crab_pi::memory::dev_barrier;
 use crab_pi::timer::{clear_irq, timer_get_usec, timer_init};
 use crab_pi::{print, println};

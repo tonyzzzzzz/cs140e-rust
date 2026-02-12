@@ -3,7 +3,10 @@
 #![allow(static_mut_refs)]
 
 use core::time::Duration;
-use crab_pi::gpio::{gpio_int_falling_edge, gpio_int_rising_edge, gpio_interrupt_enable, gpio_interrupt_init, gpio_read, gpio_register_interrupt_handler, gpio_set_function, gpio_write, GPIOEvent, GPIO_FUNC};
+use crab_pi::gpio::{
+    GPIO_FUNC, GPIOEvent, gpio_int_falling_edge, gpio_int_rising_edge, gpio_interrupt_enable,
+    gpio_interrupt_init, gpio_read, gpio_register_interrupt_handler, gpio_set_function, gpio_write,
+};
 use crab_pi::interrupt::{enable_interrupts, interrupt_init, register_irq_basic_handler};
 use crab_pi::memory::{dev_barrier, dmb};
 use crab_pi::println;
@@ -41,9 +44,8 @@ fn __user_main() {
     gpio_int_falling_edge(IN_PIN);
     gpio_int_rising_edge(IN_PIN);
 
-
     // Initialize Interrupts
-    unsafe{
+    unsafe {
         interrupt_init();
 
         gpio_register_interrupt_handler(IN_PIN, gpio_handler);
@@ -56,12 +58,11 @@ fn __user_main() {
         enable_interrupts();
     }
 
-    let N = 1024*32;
+    let N = 1024 * 32;
 
-    for i in 1..= N {
-
+    for i in 1..=N {
         gpio_write(OUT_PIN, false);
-        unsafe {assert_eq!(i, falling_edge_count)};
+        unsafe { assert_eq!(i, falling_edge_count) };
 
         gpio_write(OUT_PIN, true);
         unsafe {
@@ -69,7 +70,7 @@ fn __user_main() {
             assert_eq!(falling_edge_count, rising_edge_count);
         };
 
-        if(i % 1024 == 0){
+        if (i % 1024 == 0) {
             println!("{}/{}", i, N);
         }
     }
